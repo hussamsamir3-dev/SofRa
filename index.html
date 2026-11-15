@@ -265,6 +265,11 @@ input[type=range]{width:100%;height:30px;accent-color:#e2432a;margin:2px 0 0;dis
 #play.hh #vig{background:radial-gradient(ellipse at 50% 55%,#0000 50%,#ffb02055 100%)}
 #czoom{position:absolute;left:12px;bottom:calc(46% + 12px);display:flex;flex-direction:column;gap:8px}#czoom .btn{width:42px;height:42px;font-size:22px;padding:0}
 @media (min-aspect-ratio:11/10){#czoom{bottom:14px}}
+/* bell timing ring */
+#ov>.bellb.on::before{content:"";position:absolute;inset:-14px;border-radius:50%;background:conic-gradient(from -43deg,#4be06a 0 86deg,#ffffff40 0);-webkit-mask:radial-gradient(closest-side,#0000 79%,#000 81%);mask:radial-gradient(closest-side,#0000 79%,#000 81%);pointer-events:none}
+.bellb u{position:absolute;inset:-14px;border-radius:50%;rotate:var(--a,0deg);pointer-events:none;display:none}
+.bellb.on u{display:block}
+.bellb u::after{content:"";position:absolute;left:50%;top:-6px;width:13px;height:13px;margin-left:-6.5px;border-radius:50%;background:#fff;border:3px solid #7a3fd0;box-shadow:0 0 8px #fff;box-sizing:border-box}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important}}
 </style>
 
@@ -4697,7 +4702,7 @@ function buildWorld(ri){
   SHOWG.add(bx(body,0,2.66,.15,3.96,.1,3.06),bx(trim,0,2.6,.15,4,.06,3.1),bx(sign,0,3.12,-1.2,3.3,.78,.08),bx(mat('#7a431a',.6),0,3.12,-1.14,3.42,.9,.05),bx(steelp,.9,2.86,.7,.9,.3,.7),cy(steelp,-1.9,1.75,1.6,.035,1.75,.035),cy(steelp,1.9,1.75,1.6,.035,1.75,.035),bx(body,-1.98,2.1,.15,.08,1.1,3.06));
   if(C.on.neon){const m=new T.MeshStandardMaterial({color:0x111111,emissive:lin('#ff3aa0'),emissiveIntensity:2.6});SHOWG.add(bx(m,0,3.56,-1.26,3.44,.05,.05),bx(m,0,2.68,-1.26,3.44,.05,.05),bx(m,-1.72,3.12,-1.26,.05,.9,.05),bx(m,1.72,3.12,-1.26,.05,.9,.05),glow(0,3.12,-1.5,5,'#ff3aa0',.35))}
   {const am=stripeM(AW[0],AW[1]);FADEW.push(am);const aw=bx(am,0,2.42,-1.98,3.9,.05,1.36);aw.rotation.x=-.24;aw.castShadow=false;world.add(aw)}
-  {const m=mdl('menu');m.scale.setScalar(1.5);m.position.set(3.05,.12,-1.2);m.rotation.y=-.9;world.add(m)}
+  {const m=mdl('menu');m.scale.setScalar(1.5);m.position.set(3.25,.12,-.9);m.rotation.y=-.9;world.add(m)}
   // string lights from the truck to two poles across the plaza
   [-1,1].forEach(sd=>{{const q=cy(steelp,sd*3.1,1.6,-8,.035,3,.035);HIDEP.push(q);world.add(q)}for(let i=0;i<=12;i++){const t=i/12,m=new T.MeshStandardMaterial({color:0x222222,emissive:lin(['#ffd24a','#ff6b5a','#58e08a','#6ec8ff'][i%4]),emissiveIntensity:1.6}),x=sd*(1.9+t*1.2),y=2.6+t*.45-Math.sin(t*3.14)*.35,z=-1.3-t*6.7,b=P(GS,m,x,y,z,.05);b.castShadow=false;bulbs.push(b);const gl=glow(x,y,z,.45,['#ffd24a','#ff6b5a','#58e08a','#6ec8ff'][i%4],night?.7:.3);HIDEP.push(b,gl);world.add(b,gl)}});
   world.add(glow(0,2.3,-.7,2.8,'#ffb060',night?.5:dusk?.3:.15));
@@ -4825,11 +4830,11 @@ function partyLeave(i,happy){const c=G.seats[i],g=G,t=TB[i],sp0=K.seat[i].p;if(!
   setTimeout(()=>{c.dishes.forEach(m=>m.parent&&m.parent.remove(m));if(G===g&&G.seats[i]===c){G.seats[i]=null;const[x,y]=scr(V(t.p.x,t.top+.2,t.p.z));if(c.dishes.length)burst('spark',x,y,5,70)}},1300)}
 function makeWaiter(){const p=makePerson(4242,1);p.position.set(HOME.x,.12,HOME.z);actors.add(p);PEOPLE.push(p);playA(p,'Idle');const tray=grp(cy(mat('#d9dfe4',.3,.9),0,0,0,.24,.015,.24));tray.position.set(0,.84,.34);tray.visible=false;p.add(tray);WT={p,st:'idle',carry:[],tray,taken:[]}}
 function readyList(){const a=[];G.plates.forEach((p,i)=>{if(p.ready)a.push({k:'p',i,ti:p.ready.ti,ii:p.ready.ii})});for(const id in G.st)G.st[id].cups.forEach((v,i)=>{if(v===2&&G.st[id].res[i])a.push({k:'d',id,i,ti:G.st[id].res[i].ti,ii:G.st[id].res[i].ii})});return a}
-function ringBell(){const b=K.bell3;if(!b)return;const u=b.userData;tw(.7,k=>{const d=Math.exp(-k*4.5),w=Math.sin(k*42)*d;u.pl.position.y=-.035*Math.max(0,1-k*5);u.dome.rotation.z=w*.07;u.dome.scale.x=.125*(1+w*.05);b.position.y=1.02+Math.abs(w)*.012},()=>{u.pl.position.y=0;u.dome.rotation.z=0;u.dome.scale.x=.125;b.position.y=1.02});
+function ringBell(perf){const b=K.bell3;if(!b)return;const u=b.userData;tw(.7,k=>{const d=Math.exp(-k*4.5),w=Math.sin(k*42)*d;u.pl.position.y=-.035*Math.max(0,1-k*5);u.dome.rotation.z=w*.07;u.dome.scale.x=.125*(1+w*.05);b.position.y=1.02+Math.abs(w)*.012},()=>{u.pl.position.y=0;u.dome.rotation.z=0;u.dome.scale.x=.125;b.position.y=1.02});if(perf){const[x,y]=scr(K.bellP);burst('conf',x,y,26,260);for(let i=0;i<3;i++)PS.push({k:'ring',x,y,vx:0,vy:0,life:-.3-i*.12,max:.8,s:40*KS})}
   const[x,y]=scr(K.bellP);for(let i=0;i<3;i++)PS.push({k:'ring',x,y,vx:0,vy:0,life:-i*.12,max:.7,s:26*KS});burst('spark',x,y,10,150)}
-function bellUI(){if(!K.bell||!G)return;const n=readyList().length;K.bell.className='bellb'+(n&&!G.rung?' on':'')+(G.rung&&n?' rung':'');K.bell.querySelector('em').textContent=n?num(n):'';K.bell.querySelector('i').textContent=n?(G.rung?tx('الويتر جاي','On the way'):tx('نادي الويتر','Call waiter')):''}
+function bellUI(){if(!K.bell||!G)return;const n=readyList().length;{const on=!!n&&!G.rung;if(on&&!K.bellOn)G.bellT0=G.t;K.bellOn=on}K.bell.className='bellb'+(n&&!G.rung?' on':'')+(G.rung&&n?' rung':'');K.bell.querySelector('em').textContent=n?num(n):'';K.bell.querySelector('i').textContent=n?(G.rung?tx('الويتر جاي','On the way'):tx('نادي الويتر','Call waiter')):''}
 function wPath(to){const p=WT.p.position,pts=[],dx=Math.abs(p.x-to.x)>.05;if(dx&&Math.abs(p.z-LANE)>.05)pts.push(V(p.x,0,LANE));if(dx&&Math.abs(to.z-LANE)>.05)pts.push(V(to.x,0,LANE));pts.push(to);return pts}
-function wGo(to,done){const g=G;walk(WT.p,wPath(to),G.wspd,()=>{if(G===g)done()},'Running_A')}
+function wGo(to,done){const g=G;walk(WT.p,wPath(to),G.wspd*(G.wboostT>0?1.7:1),()=>{if(G===g)done()},'Running_A')}
 function wIdle(rot){WT.st='idle';playA(WT.p,'Idle');if(rot!==undefined)WT.p.rotation.y=rot}
 function waiterAI(){const w=WT;if(!w||w.st!=='idle')return;const g=G,ready=readyList(),go=G.rung&&ready.length;
   let best=-1;G.seats.forEach((c,i)=>{if(c&&c.state==='wait'&&(best<0||c.pat<G.seats[best].pat))best=i});
@@ -4853,11 +4858,11 @@ function ovEl(cls,p,html,dy){const e=document.createElement(cls==='x'||cls==='be
 function buildKitchen(L,o){
   if(kit)scene.remove(kit);kit=new T.Group();scene.add(kit);TAPS=[];OVS=[];ov.innerHTML='';K={plates:[],slots:{},st:{},seat:[]};
   LAND=app.clientWidth>app.clientHeight*1.1;
-  const r=L.r,steel=mat('#dfe6ea',.25,.9),dark=mat('#25212b',.45,.5),n=o.plates+L.drinks.length,PX=Math.min(LAND?.68:.52,(LAND?3.75:2.75)/Math.max(1,n-1)),SG=LAND?.58:.445,BG_=LAND?.66:.49,SP=LAND?.76:.47;
+  const r=L.r,steel=mat('#dfe6ea',.25,.9),dark=mat('#25212b',.45,.5),n=o.plates+L.drinks.length,PX=Math.min(LAND?.68:.52,(LAND?3.2:2.75)/Math.max(1,n-1)),SG=LAND?.58:.445,BG_=LAND?.66:.49,SP=LAND?.76:.47;
   ov.classList.toggle('dense',!LAND&&TB.length>4);TB.forEach((t,i)=>{const p=V(t.bub[0],LAND?1.62:1.42,t.bub[1]);K.seat.push({p,el:ovEl('bubble',p)});K.seat[i].el.hidden=true});
-  K.bellP=V(Math.min(LAND?2.2:1.5,(n-1)/2*PX+.47),1.08,-1.3);{const br=new T.MeshStandardMaterial({color:lin('#f2b632'),roughness:.16,metalness:1}),wd=mat('#3a2418',.5),dome=sp(br,0,.075,0,.125,.1,.125),pl=grp(cy(br,0,.2,0,.014,.07,.014),sp(br,0,.245,0,.03,.022,.03));
-    K.bell3=grp(cy(wd,0,.012,0,.17,.024,.17),cy(br,0,.03,0,.15,.014,.15),cy(wd,0,.045,0,.135,.02,.135),dome,cy(br,0,.165,0,.03,.03,.03),pl);K.bell3.userData={dome,pl};K.bell3.position.set(K.bellP.x,1.02,-1.3);K.bell3.scale.setScalar(LAND?1.2:.95);kit.add(K.bell3)}
-  K.bell=ovEl('bellb',K.bellP,'<svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0-6 6v5l-2 3h16l-2-3V9a6 6 0 0 0-6-6zm-2.500 16a2.500 2.500 0 0 0 5 0z" fill="#fff" stroke="#8a4a00" stroke-width="1.500" stroke-linejoin="round"/></svg><em></em><i></i>',-34);K.bell.dataset.a='bell';
+  K.bellP=V(LAND?2.34:1.2,1.08,LAND?-1.62:-1.66);if(LAND)kit.add(cy(mat('#3a2418',.5),2.34,.56,-1.62,.05,.9,.05),cy(mat('#3a2418',.5),2.34,.14,-1.62,.2,.05,.2),cy(mat('#8a5226',.6),2.34,1.0,-1.62,.24,.04,.24));else kit.add(bx(mat('#8a5226',.6),1.2,1.0,-1.66,.46,.04,.4),bx(mat('#6b3d1a',.6),1.2,.9,-1.52,.3,.16,.04));{const br=new T.MeshStandardMaterial({color:lin('#f2b632'),roughness:.16,metalness:1}),wd=mat('#3a2418',.5),dome=sp(br,0,.075,0,.125,.1,.125),pl=grp(cy(br,0,.2,0,.014,.07,.014),sp(br,0,.245,0,.03,.022,.03));
+    K.bell3=grp(cy(wd,0,.012,0,.17,.024,.17),cy(br,0,.03,0,.15,.014,.15),cy(wd,0,.045,0,.135,.02,.135),dome,cy(br,0,.165,0,.03,.03,.03),pl);K.bell3.userData={dome,pl};K.bell3.position.set(K.bellP.x,1.02,K.bellP.z);K.bell3.scale.setScalar(LAND?1.2:.95);kit.add(K.bell3)}
+  K.bell=ovEl('bellb',K.bellP,'<svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0-6 6v5l-2 3h16l-2-3V9a6 6 0 0 0-6-6zm-2.500 16a2.500 2.500 0 0 0 5 0z" fill="#fff" stroke="#8a4a00" stroke-width="1.500" stroke-linejoin="round"/></svg><em></em><i></i><u></u>',LAND?-30:-44);K.bell.dataset.a='bell';
   for(let i=0;i<o.plates;i++){const x=(i-(n-1)/2)*PX,g=grp(plateMesh()),items=new T.Group();g.add(items);g.position.set(x,1.02,-.9);kit.add(g);const p=V(x,1.08,-.9);
     const xb=ovEl('x',V(x+.17,1.2,-.98),'×');xb.dataset.a='trash';xb.dataset.i=i;xb.hidden=true;const tag=ovEl('ptag',V(x,1.3,-.92));tag.hidden=true;K.plates.push({g,items,p,xb,tag});TAPS.push({p,a:'plate',d:{i},obj:g})}
   L.drinks.forEach((dk,di)=>{const id=dk.id,x=((o.plates+di)-(n-1)/2)*PX,g=grp(bx(steel,0,.015,0,.46,.03,.42)),cups=[];
@@ -5036,7 +5041,7 @@ const UPS=[
 UPS.push({k:'tables',max:3,n:['ترابيزات','Tables'],d:['ترابيزة زيادة للزباين','One more table for guests'],ic:'<ellipse cx="20" cy="14" rx="15" ry="6" fill="#c98845" stroke="#4a2412" stroke-width="3"/><path d="M20 20v14M12 34h16" stroke="#4a2412" stroke-width="3" stroke-linecap="round"/>'},
 {k:'waiter',max:3,n:['سرعة الويتر','Waiter speed'],d:['الويتر يجري أسرع','The waiter moves faster'],ic:'<circle cx="20" cy="10" r="6" fill="#b3202a" stroke="#4a2412" stroke-width="3"/><path d="M10 34c0-10 4-14 10-14s10 4 10 14z" fill="#fff" stroke="#4a2412" stroke-width="3" stroke-linejoin="round"/>'},
 {k:'tray',max:2,n:['صينية أكبر','Bigger tray'],d:['الويتر يشيل طلب زيادة في المرة','The waiter carries one more dish per trip'],ic:'<ellipse cx="20" cy="24" rx="17" ry="7" fill="#dfe6ea" stroke="#4a2412" stroke-width="3"/><circle cx="14" cy="20" r="5" fill="#ffc61a" stroke="#4a2412" stroke-width="2"/><circle cx="26" cy="20" r="5" fill="#e2432a" stroke="#4a2412" stroke-width="2"/>'},
-{k:'bell',max:1,n:['جرس أوتوماتيك','Automatic bell'],d:['الويتر ييجي لوحده أول ما الطلب يجهز','The waiter comes as soon as a dish is ready'],ic:'<path d="M20 5a10 10 0 0 0-10 10v8l-4 6h28l-4-6v-8A10 10 0 0 0 20 5z" fill="#ffc61a" stroke="#4a2412" stroke-width="3" stroke-linejoin="round"/><circle cx="20" cy="33" r="3" fill="#4a2412"/>'});
+{k:'bell',max:1,n:['جرس أوتوماتيك','Automatic bell'],d:['الجرس يرن لوحده لو اتأخرت عليه','The bell rings itself if you leave it a moment'],ic:'<path d="M20 5a10 10 0 0 0-10 10v8l-4 6h28l-4-6v-8A10 10 0 0 0 20 5z" fill="#ffc61a" stroke="#4a2412" stroke-width="3" stroke-linejoin="round"/><circle cx="20" cy="33" r="3" fill="#4a2412"/>'});
 const BST=[['turbo','r',['نار عالية','High flame'],['تسوية سريعة من غير حرق ١٥ ثانية','Fast cooking, no burning for 15s'],'<svg viewBox="0 0 24 24"><path d="M12 2c1 5 6 6 6 12a6 6 0 0 1-12 0c0-3 2-4 2-7c2 1 3 3 3 5c1-3 1-6 1-10z" fill="#ffe06a" stroke="#8a1c0e" stroke-width="1.8" stroke-linejoin="round"/></svg>'],
 ['calm','g',['صبر جميل','Patience'],['يرجّع صبر كل الزباين','Refills every customer\'s patience'],'<svg viewBox="0 0 24 24"><path d="M12 21C4 15 2 11 2 8a5 5 0 0 1 10-1a5 5 0 0 1 10 1c0 3-2 7-10 13z" fill="#fff" stroke="#1c6312" stroke-width="1.8" stroke-linejoin="round"/></svg>'],
 ['gold','y',['فلوس دوبل','Double coins'],['كل طلب بضعف التمن ٢٠ ثانية','Every order pays double for 20s'],'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#fff3a8" stroke="#8a4a00" stroke-width="2"/><path d="M9 9h6M9 15h6M12 6v12" stroke="#8a4a00" stroke-width="2" stroke-linecap="round"/></svg>']];
@@ -5088,7 +5093,7 @@ function customUI(){const lv=chefLv();$('#custom').dir=AR()?'rtl':'ltr';$('#cCoi
 function decorate(r,night){const on=SAVE.cos.on;
   if(on.fanous){[-1.2,0,1.2].forEach((x,i)=>{const gold=mat('#c98a00',.3,.8),g=grp(cy(gold,0,.16,0,.012,.3,.012),P(GCone,gold,0,0,0,.07,.08,.07),cy(new T.MeshStandardMaterial({color:0x331100,emissive:lin(['#ff9a2a','#ff4a6a','#3ad0ff'][i]),emissiveIntensity:2.4}),0,-.1,0,.058,.13,.058),cy(gold,0,-.18,0,.07,.03,.07));g.position.set(x,2.05,-2.5);g.userData.sw=i*1.7;world.add(g,glow(x,1.95,-2.5,.9,['#ff9a2a','#ff4a6a','#3ad0ff'][i],.6));LAN.push(g)});const pl=new T.PointLight(lin('#ff9a3a'),1.1,6,2);pl.position.set(0,2,-2.4);world.add(pl)}
   if(on.zeena)for(let i=0;i<18;i++){const t=i/17,f=P(GCone,mat(['#e2432a','#ffc61a','#1594a8','#3fae2a','#f273ab'][i%5],.8,0,{side:T.DoubleSide}),-1.85+t*3.7,2.5-Math.sin(t*3.14)*.12,-1.36,.07,.15,.008);f.rotation.x=Math.PI;world.add(f)}
-  if(on.plants)[-2.32,2.45].forEach(x=>{const b=mdl('bush');b.scale.setScalar(2.1);b.position.set(x,.5,-1.78);world.add(b,cy(mat('#b5562a',.8),x,.3,-1.78,.2,.36,.16))});
+  if(on.plants)[-2.32,2.95].forEach(x=>{const b=mdl('bush');b.scale.setScalar(2.1);b.position.set(x,.5,-1.85);world.add(b,cy(mat('#b5562a',.8),x,.3,-1.85,.2,.36,.16))});
 }
 const marbleMat=()=>new T.MeshStandardMaterial({map:ctex(256,128,(g,w,h)=>{g.fillStyle='#f4f1ec';g.fillRect(0,0,w,h);const q=rng(8);g.strokeStyle='#9a968f';for(let i=0;i<14;i++){g.globalAlpha=.15+q()*.35;g.lineWidth=.6+q()*1.6;g.beginPath();g.moveTo(q()*w,0);g.bezierCurveTo(q()*w,h*.3,q()*w,h*.7,q()*w,h);g.stroke()}},[2,1]),roughness:.15});
 const U=(ri,k)=>(SAVE.up[ri]||{})[k]||0, cost=(ri,l)=>Math.round([60,150,320][l]*(1+ri*.6));
@@ -5181,7 +5186,7 @@ function levelIntro(ri,li){
   else{h=`<p>${tx(`${num(L.custs.length)} زبون جايين. اجمع الفلوس دي عشان النجوم:`,`${L.custs.length} customers are coming. Earn this much for each star:`)}</p><div class="goals">${L.goal.map((g,i)=>`<span>${stars(i+1)} ${num(g)}</span>`).join('')}</div>`;
     all.forEach(x=>h+=`<div class="newit">${itemImg(x.id)}<b>${tx('جديد: ','New: ')}${nm(IT[x.id].n)}</b></div>`);
     if(L.n===4)h+=`<p>${tx('جديد: زبون مهم بتاج دهب. بيدفع الضعف بس صبره قليل.','New: VIP customers wear a gold crown. They pay double but are less patient.')}</p>`;
-    if(li===0)h+=`<p>${tx(`دوس على ${nm(IT[r.base].n)}، سوّي ${nm(IT[r.mains[0].id].n)} وحطها عليه قبل ما تتحرق، وبعدين دوس على الطبق عشان يتعلّم جاهز، ورن الجرس والويتر يوصّله للترابيزة.`,`Tap the ${nm(IT[r.base].n).toLowerCase()}, cook the ${nm(IT[r.mains[0].id].n).toLowerCase()} and add it before it burns, then tap the plate to mark it ready and ring the bell. The waiter carries it to the table.`)}</p><p>${tx('دوس على الطاسة وهي بتستوي عشان تقلب الأكل وتاخد بونص، ودوس على البراد عشان تصب المشروب.','Tap a pan while it cooks to flip the food for a bonus, and tap the kettle to pour a drink.')}</p>`}
+    if(li===0)h+=`<p>${tx(`دوس على ${nm(IT[r.base].n)}، سوّي ${nm(IT[r.mains[0].id].n)} وحطها عليه قبل ما تتحرق، وبعدين دوس على الطبق عشان يتعلّم جاهز، ورن الجرس والويتر يوصّله للترابيزة. رن والنقطة في الأخضر عشان الويتر يجري أسرع.`,`Tap the ${nm(IT[r.base].n).toLowerCase()}, cook the ${nm(IT[r.mains[0].id].n).toLowerCase()} and add it before it burns, then tap the plate to mark it ready and ring the bell. The waiter carries it to the table. Ring while the dot is in the green and he sprints.`)}</p><p>${tx('دوس على الطاسة وهي بتستوي عشان تقلب الأكل وتاخد بونص، ودوس على البراد عشان تصب المشروب.','Tap a pan while it cooks to flip the food for a bonus, and tap the kettle to pour a drink.')}</p>`}
   modal(L.endless?tx('وضع الزحمة','Rush mode'):`${nm(r.pl)} · ${num(li+1)}`,h+`<button class="btn g" data-c="go" data-r="${ri}" data-i="${li}" style="font-size:26px">${tx('يلا بينا','Start')}</button><button class="btn p sm" style="width:100%" data-c="close">${tx('رجوع','Back')}</button>`);
 }
 
@@ -5229,6 +5234,7 @@ function serveItem(c,si,ii){
   c.pat=Math.min(c.max,c.pat+5);
   if(c.items.every(x=>x.done)){const f=c.pat/c.max,tip=f>.5?.2:f>.25?.1:0;pay+=Math.round(c.total*G.q*tip);if(f>.7){pay+=3;setTimeout(()=>{if(G===g)fx(tx('سريع! +٣','Fast! +3'),{p:sp0})},450)}c.state='eat';c.eat=5.4;c.bite=.5;const food=c.items.some(x=>!x.drink);c.ps.forEach(p=>setEat(p,true,food));c.dishes.forEach(m=>m.userData.s0=m.scale.x)}
   if(c.state!=='eat')c.ps.forEach(p=>{setFace(p,'joy');const g=G;setTimeout(()=>{if(G===g&&!p.userData.eating&&c.state==='order')setMood(p,p.userData.mood)},1400)});
+  if(G.wboostT>0)pay+=2;
   renderSeat(si);camPan+=TB[si].p.x*.07;
   camKick=Math.max(camKick,Math.min(2.4,.8+G.combo*.3));G.coins+=pay;fx('+'+num(pay),{p:sp0});coinsFly({p:sp0},Math.min(6,2+Math.floor(pay/8)));sfx('coin');hud();{const hc=$('#hudCoin');hc.classList.remove('bump');void hc.offsetWidth;hc.classList.add('bump')}G.hint=false;$('#hand').hidden=true;
 }
@@ -5254,12 +5260,16 @@ function act(a,d,el){
     p.extras.push(d.id);toss(el&&el.p,P.indexOf(p),d.id)}
   else if(a==='plate'){const p=P[+d.i];if(p.ready)return;if(!p.main)return p.base?bad(el):act('base',d,el);
     const m=findCust(it=>it.main===p.main&&same(it.extras,p.extras));if(!m)return bad(el);
-    p.ready={ti:m.si,ii:m.ii};m.c.items[m.ii].res=true;sfx('plate');if(G.auto)G.rung=true;renderSeat(m.si);syncPlates(+d.i);const[x,y]=scr(K.plates[+d.i].p);burst('spark',x,y,6,90)}
+    p.ready={ti:m.si,ii:m.ii};m.c.items[m.ii].res=true;sfx('plate');renderSeat(m.si);syncPlates(+d.i);const[x,y]=scr(K.plates[+d.i].p);burst('spark',x,y,6,90)}
   else if(a==='trash'){const p=P[+d.i];if(p.ready){const c=G.seats[p.ready.ti];if(c&&c.items[p.ready.ii]){c.items[p.ready.ii].res=false;renderSeat(p.ready.ti)}}P[+d.i]={base:false,main:null,extras:[],ready:null};sfx('trash');syncPlates()}
   else if(a==='drink'){const id=d.id,D=G.st[id],fi=D.cups.indexOf(1),m=fi>=0&&findCust(it=>it.drink===id);
-    if(m){D.cups[fi]=2;D.res[fi]={ti:m.si,ii:m.ii};m.c.items[m.ii].res=true;sfx('plate');if(G.auto)G.rung=true;renderSeat(m.si);bellUI();markMatches();const[x,y]=scr(K.st[id].p);burst('spark',x,y,6,90)}
+    if(m){D.cups[fi]=2;D.res[fi]={ti:m.si,ii:m.ii};m.c.items[m.ii].res=true;sfx('plate');renderSeat(m.si);bellUI();markMatches();const[x,y]=scr(K.st[id].p);burst('spark',x,y,6,90)}
     else{if(D.busy)return;const ei=D.cups.indexOf(0);if(ei<0)return bad(el);pour(id,ei)}}
-  else if(a==='bell'){if(!readyList().length)return bad(el);G.rung=true;sfx('bell');camKick=Math.max(camKick,1);bellUI();ringBell()}
+  else if(a==='bell'){const n=readyList().length;if(!n||G.rung)return bad(el);const ph=((G.t-(G.bellT0||0))%1.5)/1.5,perf=ph>.88||ph<.12;G.rung=true;sfx('bell');camKick=Math.max(camKick,perf?2.2:1);bellUI();ringBell(perf);const g=G;
+    if(perf){G.wboostT=9;G.pstreak=(G.pstreak||0)+1;sfx('power');fx(tx('رنة مظبوطة! الويتر طاير','Perfect ring! Waiter sprints'),{p:K.bellP});
+      if(G.pstreak%3===0){G.seats.forEach((c,i)=>{if(c&&c.state!=='leave'&&c.state!=='eat'&&c.state!=='walk'){c.pat=Math.min(c.max,c.pat+10);const[x,y]=scr(K.seat[i].p);PS.push({k:'heart',x,y,vx:0,vy:-34,life:0,max:1.1,s:8*KS,r:0})}});setTimeout(()=>{if(G===g)fx(tx('٣ رنات مظبوطة! الزباين مبسوطين','3 perfect rings! Guests cheer up'),{p:K.bellP})},500)}}
+    else G.pstreak=0;
+    if(n>=3){G.coins+=5;hud();setTimeout(()=>{if(G===g)fx(tx('طلبية كبيرة +٥','Big order +5'),{p:K.bellP})},perf?900:200)}}
   else if(a==='turbo'||a==='gold'){if(SAVE.boost[a]<1||G[a]>0)return;SAVE.boost[a]--;G[a]=a==='turbo'?15:20;save();sfx('win');boostUI();const[x,y]=pos(el);burst('spark',x,y,14,200)}
   else if(a==='calm'){if(SAVE.boost.calm<1)return;SAVE.boost.calm--;G.seats.forEach(c=>{if(c&&c.state!=='leave')c.pat=c.max});save();sfx('win');boostUI();const[x,y]=pos(el);burst('spark',x,y,14,200)}
 }
@@ -5294,6 +5304,9 @@ function tick(dt){
     if(c.pat<=0){G.lost++;partyLeave(i,false);hud();return}
     if(c.bar)c.bar.style.width=f*100+'%';const mood=f>.5?0:f>.25?1:2;
     if(mood!==c.moodUI){c.moodUI=mood;c.ps.forEach(p=>setMood(p,mood));if(c.bar)c.bar.className=mood===0?'':mood===1?'mid':'low'}});
+  if(G.wboostT>0){G.wboostT-=dt;if(WT&&Math.random()<.5){const[x,y]=scr(V(WT.p.position.x,.5,WT.p.position.z));PS.push({k:'tw',x:x+(Math.random()-.5)*20*KS,y:y+(Math.random()-.5)*24*KS,vx:0,vy:-10,life:0,max:.5,s:6*KS})}}
+  if(G.auto&&!G.rung&&readyList().length){G.autoT=(G.autoT||0)+dt;if(G.autoT>2.6){G.autoT=0;G.rung=true;sfx('bell');bellUI();ringBell()}}else G.autoT=0;
+  if(K.bell&&K.bellOn)K.bell.style.setProperty('--a',(((G.t-(G.bellT0||0))%1.5)/1.5*360).toFixed(1)+'deg');
   waiterAI();
   let dirty=false,active=0;G.pf+=dt;const puffNow=G.pf>.22;if(puffNow)G.pf=0;
   for(const id in G.cook){const ct=L.mains.find(m=>m.id===id).cook;G.cook[id].forEach((s,i)=>{const ks=K.slots[id][i];ks.ring.hidden=!s||s.state==='burnt';ks.fl.visible=ks.gl.visible=!!s;if(!s)return;active++;ks.fl.scale.set(.2+Math.random()*.025,.04+Math.random()*.05,.2+Math.random()*.025);
