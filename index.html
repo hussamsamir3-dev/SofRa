@@ -4889,7 +4889,7 @@ function buildTables(n){NCO=NCO.filter(m=>!m.userData.tb);TODT=9;LAND=(TY&&mode!
   const pl=tblPlan(n),pos=[];TWO=pl.two;UMG=[];
   if(!LAND)for(let i=0;i<n;i++)pos.push([i%2?.88:-.88,-3.2-(i>>1)*(n>4?1.95:2.4),i>>1]);
   else if(!TWO){const pt=n>1?Math.min(2.6,(2*pl.hw-1.7)/(n-1)):0;for(let i=0;i<n;i++)pos.push([(i-(n-1)/2)*pt,-3.35,0])}
-  else{const m=Math.ceil(n/2),pt=Math.min(2.6,(2*pl.hw2-1.8)/(m-.5));for(let i=0;i<n;i++){const row=i%2,col=i>>1;pos.push([col*pt+(row?pt/2:0),-3.5-row*1.8,row])}let lo=1e9,hi=-1e9;pos.forEach(q=>{lo=Math.min(lo,q[0]);hi=Math.max(hi,q[0])});pos.forEach(q=>q[0]-=(lo+hi)/2)}
+  else{const m=Math.ceil(n/2),pt=Math.min(2.6,(2*pl.hw2-1.8)/(m-.5));for(let i=0;i<n;i++){const row=i%2,col=i>>1;pos.push([col*pt+(row?pt/2:0),-3.5-row*(TY?2.7:1.8),row])}let lo=1e9,hi=-1e9;pos.forEach(q=>{lo=Math.min(lo,q[0]);hi=Math.max(hi,q[0])});pos.forEach(q=>q[0]-=(lo+hi)/2)}
   {const fx=pos.filter(q=>!q[2]).map(q=>q[0]).sort((a,b)=>a-b);let px=0;if(LAND){const cs=fx.length>1?fx.slice(1).map((x,i)=>(x+fx[i])/2):[fx[0]+1.25];px=cs.reduce((a,b)=>Math.abs(b-.8)<Math.abs(a-.8)?b:a)}PASS.x=HOME.x=px;PASS.z=HOME.z=LANE}
   LIMX=LAND?Math.max(3,(TWO?pl.hw2:pl.hw)-.75):1.05;const LY=(SAVE.lay&&SAVE.lay[LAND?'L':'P'])||[];
   const hit=(x,z)=>TB.some(o=>Math.hypot(o.p.x-x,o.p.z-z)<1.42);
@@ -5044,9 +5044,14 @@ function seat(p,ti,k){const ch=chairPos(ti,k);p.userData.path=null;p.userData.on
 function later(fn,ms){tw(Math.max(.01,ms/1000),()=>{},fn)}
 function spawnParty(ti,cd){const t=TB[ti],n=cd.items.length>1?2:1,side=Math.random()<.5?-1:1,max=(G.L.patience+5*(cd.items.length-1))*G.pmul*(cd.vip?.8:1),
   c={items:cd.items.map(q=>({...q,done:false,res:false})),vip:cd.vip,max,pat:max,total:cd.items.reduce((a,q)=>a+q.price,0),ps:[],state:'walk',seated:0,side,dishes:[],eat:0};
-  for(let k=0;k<n;k++){const p=makePerson(cd.look+k*77,0,cd.vip&&k===0),pts=[V(0,0,0),sidePt(ti,k)];p.position.set(side*(HWX+k*.9),.12,LANE);p.rotation.y=-side*1.57;actors.add(p);PEOPLE.push(p);c.ps.push(p);
-    walk(p,pts.slice(1),2+Math.random()*.3,()=>{const a=p.position.clone(),b=seatPt(ti,k),r0=p.rotation.y,r1=chairPos(ti,k).r,g=G;let dr=r1-r0;dr=Math.atan2(Math.sin(dr),Math.cos(dr));p.userData.sit=1;playA(p,'Sit_Chair_Down',true);tw(.55,q=>{if(G!==g||p.userData.dead)return;const e=q*q*(3-2*q);p.position.x=a.x+(b.x-a.x)*e;p.position.z=a.z+(b.z-a.z)*e;p.rotation.y=r0+dr*Math.min(1,q*2)},()=>{if(G===g&&p.userData.sit)seat(p,ti,k)});c.seated++;later(()=>{if(p.userData.sit&&!p.userData.dead)playA(p,'Sit_Chair_Idle')},800)})}
+  for(let k=0;k<n;k++){const p=makePerson(cd.look+k*77,0,cd.vip&&k===0),pts=[V(0,0,0),sidePt(ti,k)];p.position.set(side*(HWX+k*.9),.12,LANE);p.rotation.y=-side*1.57;actors.add(p);PEOPLE.push(p);c.ps.push(p);p.userData.tb=ti;
+    walk(p,pts.slice(1),2+Math.random()*.3,()=>{if(G.seats[ti]!==c||c.state==='leave'){p.userData.sit=0;walk(p,[V(side*(HWX+1),0,LANE)],2.6,()=>{p.userData.dead=true},'Walking_A');return}const a=p.position.clone(),b=seatPt(ti,k),r0=p.rotation.y,r1=chairPos(ti,k).r,g=G;let dr=r1-r0;dr=Math.atan2(Math.sin(dr),Math.cos(dr));p.userData.sit=1;playA(p,'Sit_Chair_Down',true);tw(.55,q=>{if(G!==g||p.userData.dead||!p.userData.sit)return;const e=q*q*(3-2*q);p.position.x=a.x+(b.x-a.x)*e;p.position.z=a.z+(b.z-a.z)*e;p.rotation.y=r0+dr*Math.min(1,q*2)},()=>{if(G===g&&p.userData.sit)seat(p,ti,k)});c.seated++;later(()=>{if(p.userData.sit&&!p.userData.dead)playA(p,'Sit_Chair_Idle')},800)})}
   return c}
+function tblClear(i){const t=TB[i];if(!t)return false;for(let k=0;k<PEOPLE.length;k++){const p=PEOPLE[k],u=p.userData;if(u.tb===i&&!u.dead&&Math.hypot(p.position.x-t.p.x,p.position.z-t.p.z)<2.6)return false}return true}
+function custWatch(){const out=p=>{const u=p.userData;u.sit=0;u.kick=1;walk(p,[V((p.position.x<0?-1:1)*(HWX+1),0,LANE)],2.8,()=>{u.dead=true},'Walking_A')};
+  PEOPLE.forEach(p=>{const u=p.userData;if(u.tb===undefined||u.dead)return;if(G.seats.some(c=>c&&c.state!=='leave'&&c.ps.indexOf(p)>=0)){u.orph=0;return}
+    u.orph=(u.orph||0)+1;const t=TB[u.tb],near=!t||Math.hypot(p.position.x-t.p.x,p.position.z-t.p.z)<2.6;
+    if(near&&u.orph>=4&&!u.kick)out(p);else if((near&&u.orph>=9)||u.orph>=45){u.dead=true;const[x,y]=scr(V(p.position.x,1,p.position.z));burst('spark',x,y,5,60)}})}
 function partyLeave(i,happy){const c=G.seats[i],g=G,t=TB[i],sp0=K.seat[i].p;if(!c||c.state==='leave')return;c.state='leave';if(happy&&G.tips){const amt=Math.max(2,Math.round(c.total*.18*(c.vip?1.5:1)*(G.tipM||1)));G.tips[i]={amt,t:9};if(K.tip&&K.tip[i]){K.tip[i].hidden=false;K.tip[i].querySelector('b').textContent='+'+num(amt)}}c.ps.forEach(p=>setEat(p,false));renderSeat(i);
   G.plates.forEach(p=>{if(p.ready&&p.ready.ti===i)p.ready=null});for(const id in G.st)G.st[id].cups.forEach((v,k)=>{if(v===2&&G.st[id].res[k]&&G.st[id].res[k].ti===i){G.st[id].cups[k]=1;G.st[id].res[k]=null}});syncPlates();
   if(happy){sfx('happy');sfx('register');fx(pick(AR()?['تسلم إيدك!','الله ينور!','يا سلام!','أحلى أكل!']:['Bless your hands!','Delicious!','Perfect!']),{p:sp0},'say');const[x,y]=scr(sp0);burst('spark',x,y+30,8,140);hearts(x,y+40*KS,6)}
@@ -5628,7 +5633,7 @@ const BICO={tree:'<path d="M12 21v-7"/><circle cx="12" cy="9" r="6"/>',hedge:'<r
 const bimg=k=>`<img alt="" src="${thumb('b'+k,()=>itemMesh({k,lv:0}),1.75)}">`;
 function comfort(){return Math.min(.5,(SAVE.ty.items||[]).reduce((a,q)=>a+(BIT[q.k]&&BIT[q.k][2]?0:(1+(q.lv||0))*(q.k==='fountain'?.05:.02)),0)+fxSum('pat'))}
 function setComfort(){const n=comfort();if(G){G.pmul=G.pmul/(1+(BLD.cf||0))*(1+n);if(G.dm0===undefined){G.dm0=G.dm||1;G.rg0=G.repGap||1;G.tm0=G.tipM||1}G.wspd=(2.8+.6*U(0,'waiter'))*(1+fxSum('wspd'));G.dm=G.dm0*(1+fxSum('drink'));G.repGap=G.rg0*(1-Math.min(.5,fxSum('arr')+.05*U(0,'truck')));G.tipM=G.tm0*(1+fxSum('tip'))}BLD.cf=n}
-function bmValid(g,isTable,self){const its=SAVE.ty.items;if(isTable)return Math.abs(g.x)<=LIMX&&g.z<=-3.15&&g.z>=-7.1&&!TB.some((t,i)=>i!==self&&Math.hypot(t.p.x-g.x,t.p.z-g.z)<1.5)&&!its.some(q=>Math.hypot(q.x-g.x,q.z-g.z)<1.1);
+function bmValid(g,isTable,self){const its=SAVE.ty.items;if(isTable)return Math.abs(g.x)<=LIMX&&g.z<=-3.15&&g.z>=-7.1&&!TB.some((t,i)=>i!==self&&(Math.abs(t.p.x-g.x)<1.9&&Math.abs(t.p.z-g.z)<2.3))&&!its.some(q=>Math.hypot(q.x-g.x,q.z-g.z)<1.1);
   return Math.abs(g.x)<=9.4&&g.z>=-7.5&&(g.z<=-2.95||(Math.abs(g.x)>=4.7&&g.z<=1.4&&Math.hypot(g.x+4.55,g.z-.55)>1.3&&Math.hypot(g.x-3.25,g.z+.9)>1))&&!TB.some(t=>Math.hypot(t.p.x-g.x,t.p.z-g.z)<1.25)&&!its.some((q,i)=>i!==self&&Math.hypot(q.x-g.x,q.z-g.z)<.8)&&Math.hypot(g.x-PASS.x,g.z-PASS.z)>1.2}
 function bmUI(){const e=$('#tybuild');e.hidden=!BLD.on;if(!BLD.on){if(BMR)BMR.visible=false;return}e.dir=AR()?'rtl':'ltr';const pk=BLD.pick,cap=6+2*U(0,'exp'),its=SAVE.ty.items;
   const head=`<header><span>${bico('table','#fff')}${num(TB.length)}/${num(cap)}</span><span>${tx('راحة الزباين +','Guest comfort +')+num(Math.round(comfort()*100))}%</span><span><span class="coin">ج</span>${num(SAVE.coins)}</span><button class="ok" data-c="tybm">${bico('ok','#fff')}<b>${tx('تم','Done')}</b></button></header>`;
@@ -5805,8 +5810,8 @@ function tick(dt){
   else if(!G.hint&&(G.balT-=dt)<=0){spawnBalloon();G.balT=24+Math.random()*16}
   ['turbo','gold'].forEach(k=>{if(G[k]>0){G[k]-=dt;if(G[k]<=0)boostUI()}});if(G.fever>0)G.fever-=dt;
   const cb=$('#combo');if(!cb.hidden){const rem=1-(G.t-G.lastServe)/6;if(rem<=0)cb.hidden=true;else cb.lastChild.style.transform=`scaleX(${rem})`}
-  G.spawnIn-=dt;
-  if(G.next<L.custs.length&&!(G.ty&&G.clock>=1440)){const free=G.seats.indexOf(null),gap=(G.ty?Math.max(3,8.5/tyDemand()):L.endless?Math.max(4,8.5-G.next*.1):L.gap)*(TB.length>4?.8:TB.length>3?.9:1)*(G.repGap||1);
+  G.spawnIn-=dt;G.wd=(G.wd||0)+dt;if(G.wd>=1){G.wd=0;custWatch()}
+  if(G.next<L.custs.length&&!(G.ty&&G.clock>=1440)){const free=G.seats.findIndex((q,i)=>!q&&tblClear(i)),gap=(G.ty?Math.max(3,8.5/tyDemand()):L.endless?Math.max(4,8.5-G.next*.1):L.gap)*(TB.length>4?.8:TB.length>3?.9:1)*(G.repGap||1);
     if(free>=0&&(G.spawnIn<=0||(G.seats.every(q=>!q)&&G.spawnIn<gap-2))){let lo=1;G.seats.forEach(q=>{if(q&&q.state!=='eat'&&q.state!=='leave')lo=Math.min(lo,q.pat/q.max)});
       G.seats[free]=spawnParty(free,L.custs[G.next++]);G.spawnIn=gap*(lo<.3?1.5:lo>.7?.8:1);sfx('door');hud()}}
   G.seats.forEach((c,i)=>{if(!c||c.state==='leave')return;
